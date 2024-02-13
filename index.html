@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="block.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block</title>
+</head>
+<body>
+    
+<div>
+    <h1 class="heading">Practical 1-Hello world</h1>
+    <p>
+        pragma solidity >=0.6.12 < 0.9.0; <br>
+        
+        contract HelloWorld {<br>
+          
+          function print() public pure returns (string memory) {<br>
+            return "Hello World!";<br>
+          }
+        }</p><hr><br><br>
+</div>
+<div>
+        <h1 class="heading">Practical 2-simple calculator</h1>
+        <p>// SPDX-License-Identifier: MIT<br>
+            pragma solidity >=0.6.12 < 0.9.0;<br>
+            
+            
+            contract Calculator {<br>
+                uint c;<br>
+            
+                function add(uint a, uint b) public {<br>
+                    c = a + b;<br>
+                }
+            
+                function sub(uint a, uint b) public {<br>
+                    c = a - b;<br>
+                }
+            
+                function mul(uint a, uint b) public {<br>
+                    c = a * b;<br>
+                }<br>
+            
+                function div(uint a, uint b) public {<br>
+                    require(b > 0, "The second parameter should be larger than 0");<br>
+            
+                    c = a / b;<br>
+                }<br>
+            
+                function getResult() public view returns (uint x) {<br>
+                    return c;<br>
+                }<br>
+            }</p><hr><br><br>
+    </div>
+    <div>
+            <h1 class="heading">Practical 3-increment decrement counter</h1>
+            <p>// SPDX-License-Identifier: MIT<br>
+                pragma solidity ^0.8.20;<br>
+                
+                contract Counter {<br>
+                    uint public count;<br>
+                
+                    // Function to get the current count<br>
+                    function get() public view returns (uint) {<br>
+                        return count;<br>
+                    }<br>
+                
+                    // Function to increment count by 1<br>
+                    function inc() public {<br>
+                        count += 1;<br>
+                    }<br>
+                
+                    // Function to decrement count by 1<br>
+                    function dec() public {<br>
+                        // This function will fail if count = 0<br>
+                        count -= 1;<br>
+                    }<br>
+                }</p>
+                <hr><br><br>
+        </div>
+        
+                    <div>
+                    <h1 class="heading">Practical 4-e-wallet</h1>
+                    <p>// SPDX-License-Identifier: MIT<br>
+                        pragma solidity ^0.8.20;<br>
+                        
+                        contract EtherWallet {<br>
+                            address payable public owner;<br>
+                        
+                            constructor() {<br>
+                                owner = payable(msg.sender);<br>
+                            }<br>
+                        
+                            receive() external payable {}<br>
+                        
+                            function withdraw(uint _amount) external {<br>
+                                require(msg.sender == owner, "caller is not owner");<br>
+                                payable(msg.sender).transfer(_amount);<br>
+                            }<br>
+                        
+                            function getBalance() external view returns (uint) {<br>
+                                return address(this).balance;<br>
+                          }<br>
+                        }</p>
+                        <hr><br><br>
+        </div>
+        <div>
+            <h1 class="heading">Practical 5-Voting system</h1>
+            <p>// SPDX-License-Identifier: GPL-3.0<br>
+                pragma solidity >=0.7.0 < 0.9.0;<br>
+                
+                contract Ballot {<br>
+                    
+                    struct Voter {<br>
+                        uint weight; <br>
+                        bool voted;  <br>
+                        address delegate; <br>
+                        uint vote;   <br>
+                    }<br>
+                
+                    
+                    struct Proposal {<br>
+                        bytes32 name;   // short name (up to 32 bytes)<br>
+                        uint voteCount; // number of accumulated votes<br>
+                    }
+                
+                    address public chairperson;<br>
+                
+                    
+                    mapping(address => Voter) public voters;<br>
+                
+                    // A dynamically-sized array of `Proposal` structs.<br>
+                    Proposal[] public proposals;<br>
+                
+                    /// Create a new ballot to choose one of `proposalNames`.<br>
+                    constructor(bytes32[] memory proposalNames) {<br>
+                        chairperson = msg.sender;<br>
+                        voters[chairperson].weight = 1;<br>
+                
+                        // For each of the provided proposal names,<br>
+                        // create a new proposal object and add it<br>
+                        // to the end of the array.<br>
+                        for (uint i = 0; i < proposalNames.length; i++) {<br>
+                            // `Proposal({...})` creates a temporary<br>
+                            // Proposal object and `proposals.push(...)`<br>
+                            // appends it to the end of `proposals`.<br>
+                            proposals.push(Proposal({<br>
+                                name: proposalNames[i],<br>
+                                voteCount: 0<br>
+                            }));<br>
+                        }<br>
+                    }<br>
+                
+                    // Give `voter` the right to vote on this ballot.<br>
+                    // May only be called by `chairperson`.<br>
+                    function giveRightToVote(address voter) external {<br>
+                        // If the first argument of `require` evaluates<br>
+                        // to `false`, execution terminates and all<br>
+                        // changes to the state and to Ether balances<br>
+                        // are reverted.<br>
+                        // This used to consume all gas in old EVM versions, but<br>
+                        // not anymore.<br>
+                        // It is often a good idea to use `require` to check if<br>
+                        // functions are called correctly.<br>
+                        // As a second argument, you can also provide an<br>
+                        // explanation about what went wrong.<br>
+                        require(<br>
+                            msg.sender == chairperson,<br>
+                            "Only chairperson can give right to vote."<br>
+                        );<br>
+                        require(<br>
+                            !voters[voter].voted,<br>
+                            "The voter already voted."<br>
+                        );<br>
+                        require(voters[voter].weight == 0);<br>
+                        voters[voter].weight = 1;<br>
+                    }<br>
+                
+                    /// Delegate your vote to the voter `to`.<br>
+                    function delegate(address to) external {<br>
+                        // assigns reference<br>
+                        Voter storage sender = voters[msg.sender];<br>
+                        require(sender.weight != 0, "You have no right to vote");<br>
+                        require(!sender.voted, "You already voted.");<br>
+                
+                        require(to != msg.sender, "Self-delegation is disallowed.");<br>
+                
+                        // Forward the delegation as long as<br>
+                        // `to` also delegated.<br>
+                        // In general, such loops are very dangerous,<br>
+                        // because if they run too long, they might<br>
+                        // need more gas than is available in a block.<br>
+                        // In this case, the delegation will not be executed,<br>
+                        // but in other situations, such loops might<br>
+                        // cause a contract to get "stuck" completely.<br>
+                        while (voters[to].delegate != address(0)) {<br>
+                            to = voters[to].delegate;<br>
+                
+                            // We found a loop in the delegation, not allowed.<br>
+                            require(to != msg.sender, "Found loop in delegation.");<br>
+                        }<br>
+                
+                        Voter storage delegate_ = voters[to];<br>
+                
+                        // Voters cannot delegate to accounts that cannot vote.<br>
+                        require(delegate_.weight >= 1);<br>
+                
+                        // Since `sender` is a reference, this<br>
+                        // modifies `voters[msg.sender]`.<br>
+                        sender.voted = true;<br>
+                        sender.delegate = to;<br>
+                
+                        if (delegate_.voted) {<br>
+                            // If the delegate already voted,<br>
+                            // directly add to the number of votes<br>
+                            proposals[delegate_.vote].voteCount += sender.weight;<br>
+                        } else {<br>
+                            // If the delegate did not vote yet,<br>
+                            // add to her weight.<br>
+                            delegate_.weight += sender.weight;<br>
+                        }<br>
+                    }<br>
+                
+                    /// Give your vote (including votes delegated to you)<br>
+                    
+                    /// to proposal `proposals[proposal].name`.<br>
+                    function vote(uint proposal) external {<br>
+                        Voter storage sender = voters[msg.sender];<br>
+                        require(sender.weight != 0, "Has no right to vote");<br>
+                        require(!sender.voted, "Already voted.");<br>
+                        sender.voted = true;<br>
+                        sender.vote = proposal;<br>
+                
+                        // If `proposal` is out of the range of the array,<br>
+                        // this will throw automatically and revert all<br>
+                        // changes.<br>
+                        proposals[proposal].voteCount += sender.weight;<br>
+                    }<br>
+                
+                    /// @dev Computes the winning proposal taking all<br>
+                    /// previous votes into account.<br>
+                    function winningProposal() public view<br>
+                            returns (uint winningProposal_)<br>
+                    {<br>
+                        uint winningVoteCount = 0;<br>
+                        for (uint p = 0; p < proposals.length; p++) {<br>
+                            if (proposals[p].voteCount > winningVoteCount) {<br>
+                                winningVoteCount = proposals[p].voteCount;<br>
+                                winningProposal_ = p;<br>
+                            }<br>
+                        }<br>
+                    }<br>
+                
+                    // Calls winningProposal() function to get the index<br>
+                    // of the winner contained in the proposals array and then<br>
+                    // returns the name of the winner<br>
+                    function winnerName() external view<br>
+                            returns (bytes32 winnerName_)<br>
+                    {<br>
+                        winnerName_ = proposals[winningProposal()].name;<br>
+                    }<br>
+                }</p>
+                <hr><br><br>
+        </div>
+        <div>
+            <h1 class="heading">Practical 6-hash</h1>
+            <p>// SPDX-License-Identifier: GPL-3.0<br>
+                pragma solidity >=0.7.0 < 0.9.0;<br>
+                
+                contract Test {<br>
+                   function callKeccak256() public pure returns(bytes32 result){<br>
+                      return keccak256("ABC");<br>
+                   }<br>
+                }</p>
+                <hr><br><br>
+        </div>
+        <div>
+            <h1 class="heading">Practical 7-payment system</h1>
+            <p>
+                // SPDX-License-Identifier: MIT<br>
+                pragma solidity ^0.8.0;<br>
+
+                contract PaymentSystem {<br>
+                    address public owner;<br>
+                    mapping(address => uint256) public balances;<br>
+
+                    event PaymentReceived(address indexed from, uint256 amount);<br>
+                    event Withdrawal(address indexed to, uint256 amount);<br>
+
+                    modifier onlyOwner() {<br>
+                        require(msg.sender == owner, "Only the owner can call this function");<br>
+                        _;<br>
+                    }<br>
+
+                    constructor() {<br>
+                        owner = msg.sender;<br>
+                    }<br>
+                    receive() external payable {<br>
+                        balances[msg.sender] += msg.value;<br>
+                        emit PaymentReceived(msg.sender, msg.value);<br>
+                    }<br>
+
+                    function withdraw(uint256 amount) external onlyOwner {<br>
+                        require(amount <= address(this).balance, "Insufficient balance");<br>
+                        payable(owner).transfer(amount);<br>
+                        emit Withdrawal(owner, amount);<br>
+                    }<br>
+                }
+            </p>
+            <hr><br><br>
+        </div>
+        <div>
+            <h1 class="heading">Practical 8-receive and send</h1>
+            <p>//SPDX-License-Identifier: MIT<br>
+
+                pragma solidity ^0.8.0;<br>
+                
+                contract SendWithdrawMoney {<br>
+                
+                    uint public balanceReceived;<br>
+                    function deposit() public payable {<br>
+                        balanceReceived += msg.value;<br>
+                    }<br>
+                
+                    function getContractBalance() public view returns(uint) {<br>
+                        return address(this).balance;<br>
+                    }<br>
+                
+                    function withdrawAll() public {<br>
+                        address payable to = payable(msg.sender);<br>
+                        to.transfer(getContractBalance());<br>
+                    }<br>
+                
+                    function withdrawToAddress(address payable to) public {<br>
+                        to.transfer(getContractBalance());<br>
+                    }<br>
+                }</p>
+                <hr><br><br>
+        
+
+        </div>
+</body>
+</html>
